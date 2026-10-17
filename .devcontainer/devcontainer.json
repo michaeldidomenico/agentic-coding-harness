@@ -1,7 +1,7 @@
 {
   "name": "Agentic Coding Harness",
-  "image": "ubuntu",
-  "remoteUser": "root",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "vscode",
   "customizations": {
     "vscode": {
       "extensions": [
