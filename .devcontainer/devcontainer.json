@@ -1,15 +1,9 @@
 {
   "name": "Agentic Coding Harness",
-  "image": "://microsoft.com",
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
-  "remoteUser": "vscode",
+  "image": "ubuntu",
+  "remoteUser": "root",
   "customizations": {
     "vscode": {
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
-      },
       "extensions": [
         "ms-python.python",
         "yzhang.markdown-all-in-one"

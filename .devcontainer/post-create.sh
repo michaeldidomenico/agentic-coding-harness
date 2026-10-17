@@ -1,25 +1,25 @@
 #!/bin/bash
-# Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "=== Initializing Agentic Coding Harness Environment ==="
+echo "=== Initializing Secure Infrastructure Layer ==="
 
-# Update pip and install any foundational python utilities you choose to build
-pip install --upgrade pip
+# 1. Update system package repositories and provision basic software tools
+apt-get update && apt-get install -y curl git sqlite3 python3 python3-pip nodejs npm
 
-# Pre-create the projects and configuration zone to avoid pathing errors
+# 2. Install the GitHub CLI tool globally
+curl -fsSL https://github.com | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://github.com stable main" | tee /etc/apt/sources.list.p/github-cli.list > /dev/null
+apt-get update && apt-get install -y gh
+
+# 3. Establish required directories and map workspace permissions
 mkdir -p /workspaces/agentic-coding-harness/projects
 mkdir -p /workspaces/agentic-coding-harness/config
-
-# Configure Git safe directories
-# This prevents ownership permission errors when mounting target repos into /projects/
 git config --global --add safe.directory '*'
-
-# STABILITY: Ensure target folder tracking dependencies are prepared
 touch /workspaces/agentic-coding-harness/projects/.gitkeep
 
-# Install open code as a harness
-echo "Installing OpenCode Engine..."
-npm install -g @opencode/cli || curl -fsSL https://opencode.live | sh
+# 4. Install the OpenCode CLI Engine globally using the verified path
+echo "📥 Provisioning OpenCode CLI Platform..."
+curl -fsSL https://opencode.ai | bash
 
-echo "=== Environment Ready! ==="
+echo "=== Harness Architecture Initialized Successfully ==="
