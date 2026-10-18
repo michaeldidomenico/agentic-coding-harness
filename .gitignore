@@ -1,0 +1,14 @@
+# Isolate the dynamic project working zone
+projects/*
+!projects/.gitkeep
+
+# Python environment & orchestration noise
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local workspace and security files
+.env
+.DS_Store
