@@ -1,6 +1,6 @@
 {
-  "$schema": "https://opencode.ai/config.json",
-  "model": "openrouter/google/gemini-2.5-flash",
+  "$schema": "https://opencode.ai",
+  "model": "openrouter/deepseek/deepseek-v4.1-flash",
   "instructions": [
     "/workspaces/agentic-coding-harness/config/AGENTS.universal.md"
   ],
@@ -9,7 +9,7 @@
       "name": "OpenRouter Proxy",
       "package": "@opencode/ai/providers/openai-compatible",
       "settings": {
-        "baseURL": "https://openrouter.ai",
+        "baseURL": "https://openrouter.ai/api/v1",
         "apiKey": "{env:OPENROUTER_API_KEY}"
       }
     }
@@ -17,7 +17,7 @@
   "agents": {
     "AgentManager": {
       "mode": "primary",
-      "model": "openrouter/google/gemini-2.5-pro",
+      "model": "openrouter/stepfun/step-5-preview",
       "description": "Orchestrator hub and architecture planner.",
       "permissions": [
         { "action": "shell", "resource": "*", "effect": "allow" },
@@ -26,7 +26,7 @@
     },
     "CodeExplorer": {
       "mode": "subagent",
-      "model": "openrouter/google/gemini-2.5-flash",
+      "model": "openrouter/zhipu/glm-5.3-flash",
       "description": "Read-only workspace cartographer.",
       "permissions": [
         { "action": "shell", "resource": "ls, find, grep", "effect": "allow" },
@@ -36,7 +36,7 @@
     },
     "PlanVerifier": {
       "mode": "subagent",
-      "model": "openrouter/google/gemini-2.5-pro",
+      "model": "openrouter/anthropic/claude-sonnet-5",
       "description": "Immutable security and risk gate.",
       "permissions": [
         { "action": "shell", "resource": "*", "effect": "deny" },
@@ -45,7 +45,7 @@
     },
     "CodeExecutor": {
       "mode": "subagent",
-      "model": "openrouter/google/gemini-2.5-flash",
+      "model": "openrouter/deepseek/deepseek-v4.1-flash",
       "description": "Surgical write action engine.",
       "permissions": [
         { "action": "shell", "resource": "*", "effect": "allow" },
