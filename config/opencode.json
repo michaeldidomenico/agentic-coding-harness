@@ -21,7 +21,7 @@
   "agent": {
     "AgentManager": {
       "mode": "primary",
-      "model": "openrouter/stepfun/step-5-preview",
+      "model": "openrouter/stepfun/step-3.7-flash",
       "description": "Orchestrator hub and architecture planner.",
       "tools": {
         "write": false,
