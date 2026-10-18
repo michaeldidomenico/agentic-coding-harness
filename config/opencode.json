@@ -4,6 +4,9 @@
   "instructions": [
     "/workspaces/agentic-coding-harness/config/AGENTS.universal.md"
   ],
+  "skills": [
+    "/workspaces/agentic-coding-harness/config/skills"
+  ],
   "providers": {
     "openrouter": {
       "name": "OpenRouter Proxy",
