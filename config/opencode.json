@@ -18,46 +18,42 @@
       }
     }
   },
-  "agent": {
+  "agents": {
     "AgentManager": {
       "mode": "primary",
       "model": "openrouter/stepfun/step-3.7-flash",
       "description": "Orchestrator hub and architecture planner.",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": true
-      }
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "allow" }
+      ]
     },
     "CodeExplorer": {
       "mode": "subagent",
       "model": "openrouter/zhipu/glm-5.3-flash",
       "description": "Read-only workspace cartographer.",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": true
-      }
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "allow" }
+      ]
     },
     "PlanVerifier": {
       "mode": "subagent",
       "model": "openrouter/anthropic/claude-sonnet-5",
       "description": "Immutable security and risk gate.",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": false
-      }
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
     },
     "CodeExecutor": {
       "mode": "subagent",
       "model": "openrouter/deepseek/deepseek-v4.1-flash",
       "description": "Surgical write action engine.",
-      "tools": {
-        "write": true,
-        "edit": true,
-        "bash": true
-      }
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "allow" },
+        { "action": "shell", "resource": "*", "effect": "allow" }
+      ]
     }
   }
 }
