@@ -8,16 +8,6 @@
   "skills": [
     "/workspaces/agentic-coding-harness/config/skills"
   ],
-  "providers": {
-    "openrouter": {
-      "name": "OpenRouter Proxy",
-      "package": "@opencode/ai/providers/openai-compatible",
-      "settings": {
-        "baseURL": "https://openrouter.ai",
-        "apiKey": "{env:OPENROUTER_API_KEY}"
-      }
-    }
-  },
   "agents": {
     "AgentManager": {
       "mode": "primary",
