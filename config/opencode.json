@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "openrouter/deepseek/deepseek-v4.1-flash",
+  "model": "openrouter/stepfun/step-3.7-flash",
   "default_agent": "AgentManager",
   "instructions": [
     "/workspaces/agentic-coding-harness/config/AGENTS.universal.md"
@@ -20,7 +20,7 @@
     },
     "CodeExplorer": {
       "mode": "subagent",
-      "model": "openrouter/zhipu/glm-5.3-flash",
+      "model": "openrouter/z-ai/glm-5.3-flash",
       "description": "Read-only workspace cartographer.",
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "deny" },
