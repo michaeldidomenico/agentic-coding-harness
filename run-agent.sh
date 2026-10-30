@@ -38,7 +38,7 @@ cd "$WORKSPACE_PATH"
 
 # 5. OpenCode Native Launch
 # Runs OpenCode in standalone mode. The engine will automatically read the
-# local opencode.json bridge, inherit your master settings, and start the AgentManager.
+# local opencode.json bridge, inherit your master settings, and start the Planner.
 opencode run \
   --standalone \
   --auto \
