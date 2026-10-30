@@ -21,3 +21,4 @@ human_review_required: false
 - Populate it with explicit contextual labels detailing:
   - Discovered Framework & Runtime variations.
   - Precise shell command strings required to execute local compilation, linting, and testing suites.
+- Keep it to project facts only. Do not restate agent roles, workflow phases, or tool policy here, and never create project-local `.opencode/agents` or `.opencode/skills` — those live only in the harness `config/` layer.
