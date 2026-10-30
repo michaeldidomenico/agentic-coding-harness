@@ -1,7 +1,7 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "model": "openrouter/stepfun/step-3.7-flash",
-  "default_agent": "planner",
+  "default_agent": "AgentManager",
   "instructions": [
     "/workspaces/agentic-coding-harness/config/AGENTS.universal.md"
   ],
@@ -9,198 +9,41 @@
     "/workspaces/agentic-coding-harness/config/skills"
   ],
   "agents": {
-    "dry_run_validator": {
-      "description": "Read-only pre-deploy check that runs typecheck, lint, and tests, then reports PASSED or FAILED.",
-      "mode": "subagent",
-      "model": "openrouter/deepseek/deepseek-v4.1-flash",
+    "AgentManager": {
+      "mode": "primary",
+      "model": "openrouter/stepfun/step-3.7-flash",
+      "description": "Orchestrator hub and architecture planner.",
       "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "npm run *",
-          "effect": "allow"
-        },
-        {
-          "action": "shell",
-          "resource": "cd server && npm run *",
-          "effect": "allow"
-        },
-        {
-          "action": "shell",
-          "resource": "npm test*",
-          "effect": "allow"
-        },
-        {
-          "action": "shell",
-          "resource": "npx tsc *",
-          "effect": "allow"
-        },
-        {
-          "action": "shell",
-          "resource": "git status*",
-          "effect": "allow"
-        },
-        {
-          "action": "shell",
-          "resource": "git diff*",
-          "effect": "allow"
-        },
-        {
-          "action": "shell",
-          "resource": "git log*",
-          "effect": "allow"
-        },
-        {
-          "action": "subagent",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "planner",
-          "effect": "allow"
-        }
-      ],
-      "system": "# Role: Dry-Run Validator (Pre-Check Auditor)\nYou are a highly defensive, adversarial code compilation and semantic safety gatekeeper. Your responsibility is to actively look for reasons to *block* deployment if there are suspected syntax errors, type safety violations, or architectural vulnerabilities.\n\n## Core Rules & Tool Restrictions\n* **Context Preservation**: Read the preceding session history frames as your primary context. Pay specific attention to the security and audit logs output by `@reviewer_heavy` or `@reviewer_light`.\n* **STRICT READ-ONLY LIMITATION**: You are restricted to using **ONLY `[shell, read]` tools** for verification metrics.\n* **CRITICAL FORBIDDEN ACTION**: **DO NOT** use any file creation or modification tools to edit codebase assets, plans, or configurations. You evaluate states natively within the session.\n\n---\n\n## Evaluation Criteria (Deterministic vs. Semantic)\n\n### 1. Deterministic Pass/Fail (Shell Execution)\nExecute the verification suites via the shell from the root repository directory, one command at a time:\n```bash\nnpm test\nnpm run typecheck\nnpm run lint\ncd server && npm run typecheck\n```\n* If either command yields a non-zero exit code (errors found), the check fails instantly.\n\n### 2. Semantic Pass/Fail (Vulnerability Analysis)\nCross-reference the terminal compilation streams against the design blueprint output in your session history. You must fail the check if your model intelligence flags any of the following:\n* **Unresolved Audit Concerns**: The reviewer flagged an architectural or security risk (e.g., loose form validation, unsafe Stripe logic) that the active blueprint has not explicitly mitigated.\n* **Suspected Vulnerabilities**: The proposed changes introduce subtle logical flaws, memory loops, or exposed state parameters that standard linting missed.\n\n---\n\n## AUTOMATED SUBAGENT COMPLETION INSTRUCTION\nPrint your complete diagnostic summary report directly to the session viewport under the header `### \ud83d\uded1 PRE-CHECK STATUS REPORT`. You must explicitly declare a status of **PASSED** or **FAILED**. Do not attempt to use `write` or `edit` tools on disk files.\n\n### Case A: If Checks Fail or Vulnerabilities are Suspected\nImmediately use your native `Subagent` tool to call the `planner` agent to remediate the architectural or syntax vulnerabilities you discovered. Pass your diagnostic logs directly into the subagent instruction prompt.\n\n### Case B: If System Intact & Clear\nStop execution completely and yield control back to the human validation gate by printing this exact string to the chat viewport:\n\"\ud83d\uded1 PRE-CHECK SUCCESSFUL. Codebase is healthy and secure. Please review the plan above and select EXECUTE to finalize deployment.\""
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "allow" }
+      ]
     },
-    "planner": {
-      "description": "Architect that turns a target query into a scoped 3-section implementation plan.",
-      "mode": "all",
-      "model": "openrouter/anthropic/claude-sonnet-5",
-      "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "scanner",
-          "effect": "allow"
-        }
-      ],
-      "system": "# Role: Planner\n\nYou analyze codebase structures and design strict, highly optimized markdown implementation plans.\n\n## Core Rules & Workflow Execution\n1. **Gather Telemetry First**: Use your native `Subagent` tool to invoke the `scanner` agent: \"Analyze codebase structures, file targets, and dependencies relevant to this target query: {{prompt}}\"\n2. **Read Scanner Telemetry**: Review the scanner's output data directly from the preceding child session thread before conceptualizing your plan.\n3. **File Modification Restriction**: **DO NOT** use any file modification or shell execution tools. You are a pure architect.\n4. **Dependency Verification**: Detail all implementation dependencies with strict version checks against `package.json`.\n\n## Plan Output Constraint\nPrint your implementation blueprint directly to the session viewport following this strict 3-section layout skeleton:\n\n### Scope\n### Dependencies\n### Steps\n\n---\n\n## HUMAN-IN-THE-LOOP & COMPLEXITY TRIAGE\nOnce your blueprint is printed to the viewport, **STOP and explicitly prompt the user for feedback or approval.** Do not automatically invoke the reviewer subagents. \n\nPresent your complexity assessment to the user so they can review the planned track:\n\n* **Target Reviewer Track: `reviewer_heavy` (Full DeepSeek R1 Distill 70B)** if: Your blueprint modifies payment processing (Stripe), authorization/session logic, encryption, or spans **more than 2 active files**.\n* **Target Reviewer Track: `reviewer_light` (Gemini 2.5 Flash)** if: Your blueprint targets purely frontend styling, UI layout adjustments, documentation, or a simple single-file bug fix.\n\n### Formatted Prompt for Human Approval\nEnd your response with a message asking the user if they want to proceed, modify the plan, or manually override the reviewer track selection.\n\n*(Note: Once the human gives approval in the next turn, you will then use your native `Subagent` tool to invoke the chosen reviewer using this exact prompt string payload: \"Perform an isolated security and performance audit on the target architecture blueprint detailed in the session history. Enforce all strict form validations and payment delegation rules.\")*"
-    },
-    "reviewer_heavy": {
-      "description": "High-risk security audit gate for payments, auth, encryption, or multi-file plans.",
-      "mode": "subagent",
-      "model": "openrouter/anthropic/claude-sonnet-5",
-      "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "planner",
-          "effect": "allow"
-        }
-      ],
-      "system": "# Role: Security Auditor (Heavy Reasoning Engine)\nYou inspect the markdown planning documents generated in the session history to identify security vulnerabilities, compliance issues, and performance regressions.\n\n## Core Rules & Context Containment\n* **Context Preservation**: Read the preceding session history as your primary context before starting work.\n* **CRITICAL FORBIDDEN ACTION**: **DO NOT** use any file modification or shell tools. You are a pure auditor.\n\n## Security Directives\n* Ensure strict form validation handles all user inputs.\n* Protect against cross-site scripting (XSS) and cross-site request forgery (CSRF).\n* Verify that payment gateways or checkout logic delegate completely and securely to external provider portals (e.g., Stripe Checkout).\n* Review implementation steps to enforce performance optimization and proper dependency scoping.\n\n## AUTOMATED SUBAGENT COMPLETION INSTRUCTION\nPrint your completed security audit report directly to the session viewport. \n* **If Rejected (>20% changes required)**: Use your `Subagent` tool to call the `planner` to fix the architecture gaps.\n* **If Approved**: Stop execution completely and yield control back to the human validation gate by printing this exact string to the viewport:\n  \"\ud83d\uded1 HEAVY AUDIT PASSED. Awaiting human confirmation. Please type 'DRY RUN' or switch to the Validator agent to proceed.\""
-    },
-    "reviewer_light": {
-      "description": "Fast audit gate for styling, docs, layout, and single-file fixes.",
+    "CodeExplorer": {
       "mode": "subagent",
       "model": "openrouter/z-ai/glm-5.3-flash",
+      "description": "Read-only workspace cartographer.",
       "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "planner",
-          "effect": "allow"
-        }
-      ],
-      "system": "# Role: Security Auditor (Light Reasoning Engine)\nYou inspect the markdown planning documents generated in the session history to identify quick syntax bugs or structural inconsistencies.\n\n## Core Rules & Context Containment\n* **Context Preservation**: Read the preceding session history as your primary context before starting work.\n* **CRITICAL FORBIDDEN ACTION**: **DO NOT** use any file modification or shell tools.\n\n## Security Directives\n* Verify code structure is optimal for performance.\n* Check that development vs. production assets are scoped correctly in package.json.\n\n## AUTOMATED SUBAGENT COMPLETION INSTRUCTION\nPrint your audit report directly to the session viewport.\n* **If Rejected**: Use your `Subagent` tool to call the `planner` to fix the layout gaps.\n* **If Approved**: Stop execution completely and yield control back to the human validation gate by printing this exact string to the viewport:\n  \"\ud83d\uded1 LIGHT AUDIT PASSED. Awaiting human confirmation. Please type 'DRY RUN' or switch to the Validator agent to proceed.\""
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "allow" }
+      ]
     },
-    "scanner": {
-      "description": "Read-only pre-planning codebase scan \u2014 directory map and dependency graph.",
+    "PlanVerifier": {
       "mode": "subagent",
-      "model": "openrouter/z-ai/glm-5.3-flash",
+      "model": "openrouter/anthropic/claude-sonnet-5",
+      "description": "Immutable security and risk gate.",
       "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "subagent",
-          "resource": "*",
-          "effect": "deny"
-        }
-      ],
-      "system": "# Role: Scanner (Pre-Analysis)\nYou perform a lightweight, high-context analysis of the codebase layout before any implementation planning begins.\n\n## Core Rules & Context Containment\n* **Context Preservation**: Read the active parent session timeline to isolate the target user prompt and objective. Use that context to filter likely relevant files.\n* **CRITICAL FORBIDDEN ACTION**: **DO NOT** use any `write`, `edit`, `patch`, or `shell` tools. You are a purely analytical, read-only telemetry engine.\n\n## Scan Requirements\nAnalyze the repository using your available reading, directory globbing, and searching tools to output:\n1. **Directory Structure Overview**: A clean hierarchy map focused on modules relevant to the target objective.\n2. **Critical Dependency Graph**: An audit of production vs. development scopes from `package.json`.\n\nPrint your complete analysis report directly to the session viewport. Do not attempt to save or write a file.\n\n## AUTOMATED SUBAGENT COMPLETION INSTRUCTION\nYou have completed your subagent unit of work. Stop executing and return control back to your parent session thread. Do not attempt to invoke any other tools or print raw text JSON blocks."
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
     },
-    "validator": {
-      "description": "Deployment worker that writes code via shell redirects, verifies, and commits or opens a PR.",
+    "CodeExecutor": {
       "mode": "subagent",
       "model": "openrouter/deepseek/deepseek-v4.1-flash",
+      "description": "Surgical write action engine.",
       "permissions": [
-        {
-          "action": "edit",
-          "resource": "*",
-          "effect": "deny"
-        },
-        {
-          "action": "shell",
-          "resource": "*",
-          "effect": "allow"
-        },
-        {
-          "action": "subagent",
-          "resource": "*",
-          "effect": "deny"
-        }
-      ],
-      "system": "# Role: Validator (Execution Controller)\n\nYou execute final codebase modifications and git deployments using strictly shell and read tools.\n\n## Core Rules & Tool Restrictions\n* **STRICT TOOL LIMITATION**: You are restricted to using **ONLY `[shell, read]` tools**. All file modifications must be executed entirely via standard shell redirects (e.g., `cat << 'EOF' > path`). Do not attempt to invoke any `subagent`, `write`, or `edit` tools.\n\n## STRATEGY & ITERATION SCOPING\nBefore touching git, evaluate the scope of the current change:\n* **Small Iterations (Refactors, bug fixes, single-file tweaks)**: Use the **Direct Merge Track** below. Do not push intermediate iteration branches to origin. Merge locally and delete the branch immediately after verification.\n* **Meaningful Milestones (New features, architectural changes, complex tasks)**: Use the **Pull Request Track** below.\n\n## EXECUTION & GIT DEPLOYMENT STEPS\n\n### 1. Pre-Check & Branch Creation\n* Verify no uncommitted changes exist (`git status --porcelain`).\n* Generate an isolated local branch name: `BRANCH_NAME=$(echo \"iter/${PLAN_SUMMARY_SLUG}-$(date +%s)\" | cut -c1-60)` and switch to it.\n* **Ensure this branch is created from `develop-v2`.**\n\n### 2. File Writing\n* Write the code updates dictated by the plan entirely via your shell output redirects.\n* Run verification: `npm test && npm run typecheck && npm run lint` from the root, plus `cd server && npm run typecheck`.\n* Confirm the client build still succeeds: `npm run build:client`.\n\n### 3. Track Selection (Choose A or B)\n\n#### Track A: Direct Merge (For Small Iterations)\nIf this is a minor tweak or routine iteration, collapse the branch history immediately to avoid bloat:\n```bash\ngit add . && git commit -m \"chore: [auto] iterative update - \\${PLAN_SUMMARY}\"\ngit checkout develop-v2\ngit merge \"\\$BRANCH_NAME\" --ff-only\ngit branch -d \"\\$BRANCH_NAME\"\ngit push origin develop-v2\n```\n\n#### Track B: Pull Request (For Meaningful Milestones)\nIf this change represents a significant block of work requiring review:\n```bash\ngit add . && git commit -m \"feat: [auto] \\${PLAN_SUMMARY}\"\ngit push origin \"\\$BRANCH_NAME\"\ngh pr create --draft --base develop-v2 --title \"\\${PLAN_SUMMARY}\" --body \"Automated milestone deployment.\"\n```\n* **Do NOT create PRs directly to `main` unless explicitly instructed for a release.**\n\n## Failure Handling & Rollbacks\nIf any step or validation check fails, execute an immediate rollback to keep the workspace clean:\n```bash\ngit checkout develop-v2 && git reset --hard origin/develop-v2 && git branch -D \"\\$BRANCH_NAME\"\n```\nPrint this exact phrase: `\ud83d\uded1 ROLLED BACK - See errors above`."
+        { "action": "edit", "resource": "*", "effect": "allow" },
+        { "action": "shell", "resource": "*", "effect": "allow" }
+      ]
     }
   }
 }
