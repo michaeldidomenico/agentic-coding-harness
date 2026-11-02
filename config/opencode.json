@@ -29,7 +29,7 @@
     },
     "PlanVerifier": {
       "mode": "subagent",
-      "model": "openrouter/anthropic/claude-sonnet-5",
+      "model": "openrouter/anthropic/claude-sonnet-5.5",
       "description": "Immutable security and risk gate.",
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "deny" },
@@ -38,7 +38,7 @@
     },
     "CodeExecutor": {
       "mode": "subagent",
-      "model": "openrouter/deepseek/deepseek-v4.1-flash",
+      "model": "openrouter/deepseek/deepseek-v4.1-flash-1017",
       "description": "Surgical write action engine.",
       "permissions": [
         { "action": "edit", "resource": "*", "effect": "allow" },

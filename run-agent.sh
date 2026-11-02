@@ -32,6 +32,14 @@ fi
 echo "🚀 Activating Multi-Agent Harness for Workspace: [${TARGET_PROJECT}]"
 echo "🏁 Launching OpenCode Session..."
 
+# 3b. Ensure the config bridge exists. opencode.json is gitignored, so fresh
+# worktrees, re-clones, and new branches start without it and silently lose the
+# agent registry, the skills, and the Layer 1 instruction contract.
+if [ ! -e "${WORKSPACE_PATH}/opencode.json" ]; then
+    ln -s /workspaces/agentic-coding-harness/config/opencode.json "${WORKSPACE_PATH}/opencode.json"
+    echo "🔗 Provisioned config bridge in [${TARGET_PROJECT}]"
+fi
+
 # 4. Context Transition
 # Move inside the target project directory so OpenCode scopes its work here
 cd "$WORKSPACE_PATH"
